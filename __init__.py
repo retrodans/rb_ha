@@ -1,0 +1,1 @@
+"""Fenix V24 integration."""
