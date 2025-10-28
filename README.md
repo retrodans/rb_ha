@@ -1,16 +1,11 @@
-There are some docs on setting up a local sensor: https://github.com/home-assistant/example-custom-config/tree/master/custom_components/example_sensor
+# Retrobadger Homeassistand Addons
 
-## Status
+- [Addon Tutorial](https://blog.michal.pawlik.dev/posts/smarthome/home-assistant-addons/)
+- https://github.com/home-assistant/developers.home-assistant/blob/master/docs/add-ons/tutorial.md
 
-The basic script inside "original_coding" is working, although I have sensitive data saved in there, which will need tidying up
+## Fenix v24
 
-## Next steps
-
-- Setup a local homeassistant just for debugging this - https://developers.home-assistant.io/docs/development_environment/
-- Play with my integration, as it looks promising
-
-
-## Local Setup
-
-- Run the steps outlined on https://developers.home-assistant.io/docs/development_environment/
-  - My local repo is https://github.com/retrodans/home-assistant-core
+- GETTERS
+  - `temps` : Current temperature in each room
+- SETTERS
+  - 
