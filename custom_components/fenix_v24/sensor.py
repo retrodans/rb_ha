@@ -67,13 +67,17 @@ async def async_setup_entry(
         zones = await hass.async_add_executor_job(api.get_zones)
 
         # Create a sensor entity for each zone
+        _LOGGER.info(f"Processing {len(zones)} zones from API")
+
         sensors = []
-        for zone in zones:
+        for idx, zone in enumerate(zones):
             zone_id = zone.get("zone_id")
             zone_label = zone.get("zone_label", "Unknown")
+            _LOGGER.info(f"Creating sensor {idx + 1}/{len(zones)}: {zone_label} (ID: {zone_id})")
             sensors.append(FenixTemperatureSensor(api, zone_id, zone_label))
 
         # Add all sensor entities with update_before_add=True to fetch initial state
+        _LOGGER.info(f"Adding {len(sensors)} sensors to Home Assistant")
         async_add_entities(sensors, True)
         _LOGGER.info(f"Successfully set up {len(sensors)} Fenix V24 temperature sensors")
 

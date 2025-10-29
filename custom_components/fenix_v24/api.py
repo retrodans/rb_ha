@@ -148,7 +148,11 @@ class FenixV24API:
         if response.status_code == 200:
             json_response = response.json()
             zones = json_response.get("data", {}).get("zones", [])
-            _LOGGER.debug(f"Retrieved {len(zones)} zones")
+            _LOGGER.info(f"API returned {len(zones)} zones from smarthome {self._smarthome_id}")
+            for idx, zone in enumerate(zones):
+                zone_id = zone.get("zone_id", "unknown")
+                zone_label = zone.get("zone_label", "Unknown")
+                _LOGGER.debug(f"Zone {idx + 1}: {zone_label} (ID: {zone_id})")
             return zones
         else:
             _LOGGER.error(f"Failed to get zone data: {response.status_code}")
