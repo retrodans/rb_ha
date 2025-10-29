@@ -178,6 +178,62 @@ class FenixV24API:
             _LOGGER.error(f"Failed to get zone data: {response.status_code}")
             return []
 
+    def set_boost(self, device_id: str, duration_minutes: int = 30) -> bool:
+        """Enable boost mode for a device.
+
+        Args:
+            device_id: Device ID (e.g., "C001-000")
+            duration_minutes: Duration in minutes (default 30)
+
+        Returns:
+            bool: True if successful, False otherwise
+
+        Note:
+            This sets the device to manual mode with the boost temperature
+            setpoint for the specified duration. The actual boost implementation
+            may vary - test carefully!
+        """
+        if not self._access_token:
+            raise Exception("Not authenticated")
+
+        url = API_BASE + "/query/push/"
+
+        headers = {
+            "Authorization": f"Bearer {self._access_token}",
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+
+        # Convert minutes to seconds
+        duration_seconds = duration_minutes * 60
+
+        # Build the query to enable boost mode
+        # Mode 16 appears to be boost mode based on zone data (nv_mode: '16')
+        # We'll try setting time_boost and using the consigne_boost setpoint
+        data = {
+            "token": self._access_token,
+            "smarthome_id": self._smarthome_id,
+            "context": "1",
+            "query[id_device]": device_id,
+            "query[time_boost]": str(duration_seconds),
+            "query[gv_mode]": "16",  # Boost mode
+            "query[nv_mode]": "16",
+        }
+
+        _LOGGER.info(f"Setting boost mode for device {device_id} for {duration_minutes} minutes")
+
+        try:
+            response = requests.post(url, data=data, headers=headers, timeout=API_TIMEOUT)
+
+            if response.status_code == 200:
+                _LOGGER.info(f"Successfully enabled boost for device {device_id}")
+                return True
+            else:
+                _LOGGER.error(f"Failed to set boost: {response.status_code} - {response.text}")
+                return False
+        except Exception as e:
+            _LOGGER.error(f"Exception setting boost: {e}")
+            return False
+
     @property
     def smarthome_id(self) -> str:
         """Return the smarthome ID."""

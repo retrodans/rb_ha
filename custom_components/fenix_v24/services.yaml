@@ -1,0 +1,27 @@
+# Fenix V24 Custom Services
+
+set_boost:
+  name: Set Boost Mode
+  description: Enable boost mode for a heating zone for a specified duration.
+  fields:
+    entity_id:
+      name: Entity
+      description: The temperature sensor entity for the zone to boost
+      required: true
+      example: "sensor.fenix_living_room_temperature"
+      selector:
+        entity:
+          integration: fenix_v24
+          domain: sensor
+    duration_minutes:
+      name: Duration (minutes)
+      description: How long to run boost mode (default 30 minutes)
+      required: false
+      default: 30
+      example: 60
+      selector:
+        number:
+          min: 5
+          max: 120
+          step: 5
+          unit_of_measurement: "minutes"

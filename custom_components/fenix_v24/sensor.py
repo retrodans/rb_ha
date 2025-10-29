@@ -1,10 +1,10 @@
 """Sensor platform for Fenix V24 heating system integration.
 
-This module sets up temperature sensor entities for each heating zone in a Fenix V24
-system by coordinating between the API client and sensor entities.
+This module sets up temperature and mode sensor entities for each heating zone in a
+Fenix V24 system by coordinating between the API client and sensor entities.
 
 Key features:
-- Automatic sensor creation for each discovered zone
+- Automatic sensor creation for each discovered zone (temperature + mode)
 - Per-config-entry API client isolation for multi-account support
 - Async setup with executor-based API calls
 """
@@ -19,6 +19,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .api import FenixV24API
 from .const import DOMAIN
 from .temperature_sensor import FenixTemperatureSensor
+from .mode_sensor import FenixModeSensor
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -73,13 +74,23 @@ async def async_setup_entry(
         sensors = []
         for idx, (zone_id, zone_data) in enumerate(zones):
             zone_label = zone_data.get("zone_label", "Unknown")
-            _LOGGER.info(f"Creating sensor {idx + 1}/{len(zones)}: {zone_label} (ID: {zone_id})")
-            sensors.append(FenixTemperatureSensor(api, zone_id, zone_label))
+
+            # Get the device_id from the first device in the zone
+            device_id = None
+            devices = zone_data.get("devices", [])
+            if isinstance(devices, list) and len(devices) > 0:
+                device_id = devices[0].get("id_device")
+
+            _LOGGER.info(f"Creating sensors {idx + 1}/{len(zones)}: {zone_label} (ID: {zone_id}, Device: {device_id})")
+
+            # Create both temperature and mode sensors for each zone
+            sensors.append(FenixTemperatureSensor(api, zone_id, zone_label, device_id))
+            sensors.append(FenixModeSensor(api, zone_id, zone_label, device_id))
 
         # Add all sensor entities with update_before_add=True to fetch initial state
-        _LOGGER.info(f"Adding {len(sensors)} sensors to Home Assistant")
+        _LOGGER.info(f"Adding {len(sensors)} sensors to Home Assistant ({len(zones)} zones × 2 sensors each)")
         async_add_entities(sensors, True)
-        _LOGGER.info(f"Successfully set up {len(sensors)} Fenix V24 temperature sensors")
+        _LOGGER.info(f"Successfully set up {len(sensors)} Fenix V24 sensors for {len(zones)} zones")
 
     except Exception as e:
         _LOGGER.error(f"Failed to set up Fenix V24 sensors: {e}")

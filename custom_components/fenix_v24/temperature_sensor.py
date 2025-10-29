@@ -44,6 +44,7 @@ class FenixTemperatureSensor(SensorEntity):
         api: FenixV24API,
         zone_id: str,
         zone_label: str,
+        device_id: str | None = None,
     ):
         """Initialize the Fenix V24 temperature sensor.
 
@@ -51,10 +52,12 @@ class FenixTemperatureSensor(SensorEntity):
             api: FenixV24API client instance for this sensor
             zone_id: Unique zone identifier
             zone_label: Human-readable zone name (e.g., "Living Room")
+            device_id: Device ID for control operations (e.g., "C001-000")
         """
         self._api = api
         self._zone_id = zone_id
         self._zone_label = zone_label
+        self._device_id = device_id
 
         # Entity attributes
         self._attr_name = f"Fenix {zone_label} Temperature"
@@ -63,6 +66,11 @@ class FenixTemperatureSensor(SensorEntity):
         self._attr_device_class = SensorDeviceClass.TEMPERATURE
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_native_value = None
+
+    @property
+    def device_id(self) -> str | None:
+        """Return the device ID for this sensor."""
+        return self._device_id
 
     def update(self) -> None:
         """Fetch the latest temperature data for this zone.
