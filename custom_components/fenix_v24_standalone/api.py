@@ -148,7 +148,15 @@ class FenixV24API:
         if response.status_code == 200:
             json_response = response.json()
             # Zones are returned as a dict where keys are zone IDs
-            zones_dict = json_response.get("data", {}).get("zones", {})
+            zones_raw = json_response.get("data", {}).get("zones", {})
+
+            # Ensure zones is a dict (API might return empty list [] instead of {})
+            if not isinstance(zones_raw, dict):
+                _LOGGER.warning(f"API returned zones as {type(zones_raw).__name__}, expected dict. Raw value: {zones_raw}")
+                zones_dict = {}
+            else:
+                zones_dict = zones_raw
+
             _LOGGER.info(f"API returned {len(zones_dict)} zones from smarthome {self._smarthome_id}")
 
             # Convert dict to list of tuples (zone_id, zone_data)
