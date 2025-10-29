@@ -67,12 +67,12 @@ async def async_setup_entry(
         zones = await hass.async_add_executor_job(api.get_zones)
 
         # Create a sensor entity for each zone
+        # Note: zones is a list of tuples (zone_id, zone_data)
         _LOGGER.info(f"Processing {len(zones)} zones from API")
 
         sensors = []
-        for idx, zone in enumerate(zones):
-            zone_id = zone.get("zone_id")
-            zone_label = zone.get("zone_label", "Unknown")
+        for idx, (zone_id, zone_data) in enumerate(zones):
+            zone_label = zone_data.get("zone_label", "Unknown")
             _LOGGER.info(f"Creating sensor {idx + 1}/{len(zones)}: {zone_label} (ID: {zone_id})")
             sensors.append(FenixTemperatureSensor(api, zone_id, zone_label))
 

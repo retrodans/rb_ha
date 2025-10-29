@@ -117,13 +117,13 @@ class FenixV24API:
         """Retrieve heating zone data from the Fenix V24 API.
 
         Queries the Fenix V24 API to get all zones configured for this smarthome.
+        The API returns zones as a dictionary where keys are zone IDs.
         Each zone contains information about:
-        - zone_id: Unique identifier for the zone
         - zone_label: Human-readable name (e.g., "Living Room")
-        - devices: List of heating devices in the zone with temperature data
+        - devices: Dictionary of heating devices in the zone with temperature data
 
         Returns:
-            list: List of zone dictionaries, or empty list if request fails
+            list: List of tuples (zone_id, zone_data), or empty list if request fails
 
         Raises:
             Exception: If no access token is available (not authenticated)
@@ -147,9 +147,18 @@ class FenixV24API:
 
         if response.status_code == 200:
             json_response = response.json()
-            zones = json_response.get("data", {}).get("zones", [])
-            _LOGGER.debug(f"Retrieved {len(zones)} zones")
-            return zones
+            # Zones are returned as a dict where keys are zone IDs
+            zones_dict = json_response.get("data", {}).get("zones", {})
+            _LOGGER.info(f"API returned {len(zones_dict)} zones from smarthome {self._smarthome_id}")
+
+            # Convert dict to list of tuples (zone_id, zone_data)
+            zones_list = []
+            for zone_id, zone_data in zones_dict.items():
+                zone_label = zone_data.get("zone_label", "Unknown")
+                _LOGGER.info(f"Zone: {zone_label} (ID: {zone_id})")
+                zones_list.append((zone_id, zone_data))
+
+            return zones_list
         else:
             _LOGGER.error(f"Failed to get zone data: {response.status_code}")
             return []
