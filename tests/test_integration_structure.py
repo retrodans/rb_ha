@@ -103,10 +103,11 @@ class TestManifestJson:
 
     @pytest.mark.unit
     def test_manifest_requirements(self, manifest):
-        """Test that requirements are specified."""
+        """Test that requirements are specified correctly."""
         requirements = manifest.get("requirements", [])
         assert isinstance(requirements, list), "requirements should be a list"
-        assert "requests" in " ".join(requirements), "requests library should be in requirements"
+        # requests is a core HA dependency, so we don't need to specify it
+        # Empty requirements list is fine for integrations using only core dependencies
 
 
 class TestStringsJson:

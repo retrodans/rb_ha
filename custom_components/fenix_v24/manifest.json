@@ -7,6 +7,6 @@
   "documentation": "https://github.com/retrobadger/rb_ha",
   "integration_type": "hub",
   "iot_class": "cloud_polling",
-  "requirements": ["requests==2.31.0"],
+  "requirements": [],
   "version": "0.1.0"
 }
