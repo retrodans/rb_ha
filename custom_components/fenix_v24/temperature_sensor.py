@@ -94,11 +94,18 @@ class FenixTemperatureSensor(SensorEntity):
             # Find the data for this specific zone
             for zone_id, zone_data in zones:
                 if zone_id == self._zone_id:
-                    # Devices are stored as a dict where keys are device indices
-                    devices = zone_data.get("devices", {})
-                    if devices:
+                    # Devices can be either a list or dict depending on API version
+                    devices = zone_data.get("devices", [])
+
+                    primary_device = None
+                    if isinstance(devices, list) and len(devices) > 0:
+                        # Use the first device as the primary temperature source
+                        primary_device = devices[0]
+                    elif isinstance(devices, dict):
                         # Use device '0' as the primary temperature source
                         primary_device = devices.get("0", {})
+
+                    if primary_device:
                         temp_raw = primary_device.get("temperature_air")
 
                         if temp_raw:

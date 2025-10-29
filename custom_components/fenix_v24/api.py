@@ -147,24 +147,31 @@ class FenixV24API:
 
         if response.status_code == 200:
             json_response = response.json()
-            # Zones are returned as a dict where keys are zone IDs
-            zones_raw = json_response.get("data", {}).get("zones", {})
+            # Zones can be returned as either a list or dict depending on API version
+            zones_raw = json_response.get("data", {}).get("zones", [])
 
-            # Ensure zones is a dict (API might return empty list [] instead of {})
-            if not isinstance(zones_raw, dict):
-                _LOGGER.warning(f"API returned zones as {type(zones_raw).__name__}, expected dict. Raw value: {zones_raw}")
-                zones_dict = {}
-            else:
-                zones_dict = zones_raw
+            _LOGGER.info(f"API returned {len(zones_raw) if isinstance(zones_raw, (list, dict)) else 0} zones from smarthome {self._smarthome_id}")
 
-            _LOGGER.info(f"API returned {len(zones_dict)} zones from smarthome {self._smarthome_id}")
-
-            # Convert dict to list of tuples (zone_id, zone_data)
+            # Convert to list of tuples (zone_id, zone_data)
             zones_list = []
-            for zone_id, zone_data in zones_dict.items():
-                zone_label = zone_data.get("zone_label", "Unknown")
-                _LOGGER.info(f"Zone: {zone_label} (ID: {zone_id})")
-                zones_list.append((zone_id, zone_data))
+
+            if isinstance(zones_raw, list):
+                # API returns zones as a list with 'num_zone' field
+                for zone_data in zones_raw:
+                    zone_id = str(zone_data.get("num_zone", "unknown"))
+                    zone_label = zone_data.get("zone_label", "Unknown")
+                    _LOGGER.info(f"Zone: {zone_label} (ID: {zone_id})")
+                    zones_list.append((zone_id, zone_data))
+
+            elif isinstance(zones_raw, dict):
+                # API returns zones as dict where keys are zone IDs
+                for zone_id, zone_data in zones_raw.items():
+                    zone_label = zone_data.get("zone_label", "Unknown")
+                    _LOGGER.info(f"Zone: {zone_label} (ID: {zone_id})")
+                    zones_list.append((zone_id, zone_data))
+
+            else:
+                _LOGGER.warning(f"API returned zones as unexpected type: {type(zones_raw).__name__}")
 
             return zones_list
         else:
