@@ -1,0 +1,12 @@
+{
+  "domain": "fenix_v24",
+  "name": "Fenix V24 Heating System",
+  "codeowners": ["@retrobadger"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/retrobadger/rb_ha",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "requirements": ["requests==2.31.0"],
+  "version": "0.1.0"
+}

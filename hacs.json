@@ -1,0 +1,7 @@
+{
+  "name": "Fenix V24 Heating System",
+  "content_in_root": false,
+  "filename": "fenix_v24",
+  "render_readme": true,
+  "homeassistant": "2024.1.0"
+}

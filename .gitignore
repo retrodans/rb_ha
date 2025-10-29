@@ -1,3 +1,40 @@
+# Configuration files with credentials
 config.json
+**/config.json
+template_config.json
+
+# Example/test files
 example_*
+
+# API testing tools
 .bruno
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Development/testing
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Archive/backup
+archive/
+backup/
+
+venv/
