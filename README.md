@@ -21,16 +21,15 @@ A custom integration for the Fenix V24 heating system that provides temperature 
 
 1. Ensure [HACS](https://hacs.xyz/) is installed in your Home Assistant instance
 2. Open HACS in your Home Assistant instance
-3. Go to "Integrations"
-4. Click the three dots (⋮) in the top right corner
-5. Select "Custom repositories"
-6. Add repository URL: `https://github.com/retrobadger/rb_ha`
-7. Select category: "Integration"
-8. Click "Add"
-9. Find "Fenix V24 Heating System" in HACS and click "Download"
-10. Restart Home Assistant
-11. Go to **Settings** → **Devices & Services** → **Add Integration**
-12. Search for "Fenix V24 Heating System" and follow the setup wizard
+3. Click the three dots (⋮) in the top right corner
+4. Select "Custom repositories"
+5. Add repository URL: `https://github.com/retrodans/rb_ha`
+6. Select type: "Integration"
+7. Click "Add"
+8. Find "Fenix V24 Heating System" in HACS and click "Download"
+9.  Restart Home Assistant
+10. Go to **Settings** → **Devices & Services** → **Add Integration**
+11. Search for "Fenix V24 Heating System" and follow the setup wizard
 
 #### Manual Installation
 
