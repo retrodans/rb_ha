@@ -8,7 +8,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers import entity_platform
+from homeassistant.helpers import entity_registry as er
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         duration_minutes = call.data.get("duration_minutes", 30)
 
         # Find the entity
-        entity_registry = hass.helpers.entity_registry.async_get(hass)
+        entity_registry = er.async_get(hass)
         entity_entry = entity_registry.async_get(entity_id)
 
         if entity_entry is None:
