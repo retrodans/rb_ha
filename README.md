@@ -1,86 +1,63 @@
-# Retrobadger Home Assistant Custom Integrations
+# Fenix V24 Heating System - Home Assistant Integration
 
-This repository contains custom Home Assistant integrations for various smart home devices.
+A custom Home Assistant integration for the Fenix V24 heating system. Provides temperature and mode sensors for each heating zone.
 
-## Fenix V24 Heating System Integration
+## Features
 
-A custom integration for the Fenix V24 heating system that provides temperature sensors for each zone in your home.
-
-### Features
-
-- Automatic discovery of all zones in your Fenix V24 system
-- Temperature sensors for each zone
+- Automatic discovery of all heating zones
+- Temperature sensors for each zone (real-time, polled every ~30s)
+- Mode sensors showing current operating mode (Auto, Manual, Eco, Off, Antifreeze)
 - OAuth2 authentication with automatic token refresh
 - Configuration via Home Assistant UI (no YAML required)
 
-### Installation
+## Installation
 
-#### HACS (Recommended)
+### HACS (Recommended)
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=retrobadger&repository=rb_ha&category=integration)
 
-1. Ensure [HACS](https://hacs.xyz/) is installed in your Home Assistant instance
-2. Open HACS in your Home Assistant instance
-3. Click the three dots (⋮) in the top right corner
-4. Select "Custom repositories"
-5. Add repository URL: `https://github.com/retrodans/rb_ha`
-6. Select type: "Integration"
-7. Click "Add"
-8. Find "Fenix V24 Heating System" in HACS and click "Download"
-9.  Restart Home Assistant
-10. Go to **Settings** → **Devices & Services** → **Add Integration**
-11. Search for "Fenix V24 Heating System" and follow the setup wizard
+1. Ensure [HACS](https://hacs.xyz/) is installed
+2. Open HACS, click the three dots, select "Custom repositories"
+3. Add repository URL: `https://github.com/retrodans/rb_ha`, type: "Integration"
+4. Find "Fenix V24 Heating System" and click "Download"
+5. Restart Home Assistant
+6. Go to **Settings > Devices & Services > Add Integration** and search for "Fenix V24"
 
-#### Manual Installation
+### Manual Installation
 
-1. Copy the `custom_components/fenix_v24` folder to your Home Assistant's `config/custom_components/` directory:
-   ```
-   config/
-   └── custom_components/
-       └── fenix_v24/
-           ├── __init__.py
-           ├── config_flow.py
-           ├── manifest.json
-           ├── sensor.py
-           └── strings.json
-   ```
-
+1. Copy `custom_components/fenix_v24/` to your HA `config/custom_components/` directory
 2. Restart Home Assistant
+3. Go to **Settings > Devices & Services > Add Integration** and search for "Fenix V24"
 
-3. Go to **Settings** → **Devices & Services** → **Add Integration**
+### Deploying via SSH
 
-4. Search for "Fenix V24 Heating System"
-
-5. Enter your credentials:
-   - Email: Your Fenix V24 account email
-   - Password: Your Fenix V24 account password
-   - Smarthome ID: Your smarthome ID (format: `<SMARTHOME_ID_FROM_WEBSITE_URL>`)
-
-6. Your temperature sensors will appear automatically!
-
-### Finding Your Smarthome ID
-
-You can find your smarthome ID by:
-1. Logging into the Fenix V24 web interface
-2. Checking the URL or API calls in your browser's developer tools
-3. Or contact Fenix support
-
-### Current Features
-
-- **Temperature Sensors**: Real-time temperature readings for each zone
-
-### Future Features (Planned)
-
-- Climate entity for thermostat control
-- Set temperature setpoints
-- Control heating modes
-- Zone on/off control
-
-### Troubleshooting
-
-Check the Home Assistant logs for any errors:
-```
-Settings → System → Logs
+Use the included deploy script:
+```bash
+HA_HOST=homeassistant.local ./deploy_to_ha.sh
 ```
 
-Look for entries containing `fenix_v24` or `Fenix V24`
+## Setup
+
+You'll need:
+- **Email**: Your Fenix V24 account email
+- **Password**: Your Fenix V24 account password
+- **Smarthome ID**: Found in the URL when logged into the Fenix V24 web interface
+
+## Documentation
+
+Docs follow the [Diataxis](https://diataxis.fr/) model:
+
+- [API Reference](docs/reference/api.md) - Endpoints, parameters, response formats
+- [Modes Reference](docs/reference/modes.md) - Mode values, device IDs, temperature conversion
+- [Automation Examples](docs/how-to/automations.md) - HA automations and dashboard cards
+- [Architecture](docs/explanation/architecture.md) - How the integration works
+
+## API Testing with Bruno
+
+A [Bruno](https://www.usebruno.com/) collection is included in `.bruno/` for testing the Fenix API directly. Configure your credentials in `.bruno/environments/fenix.bru`, then use the requests to experiment with mode changes before integrating them into HA.
+
+## Troubleshooting
+
+Check Home Assistant logs for entries containing `fenix_v24`:
+
+**Settings > System > Logs**
