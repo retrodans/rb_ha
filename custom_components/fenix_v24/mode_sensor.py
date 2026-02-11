@@ -11,26 +11,16 @@ from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import EntityCategory
 
 from .api import FenixV24API
+from .const import MODE_MAPPINGS
 
 _LOGGER = logging.getLogger(__name__)
-
-# Mode mappings based on control_api.py and observed values
-MODE_MAPPINGS = {
-    "0": "Off",
-    "2": "Eco",
-    "8": "Eco",
-    "11": "Auto",
-    "13": "Antifreeze",
-    "15": "Manual",
-    "16": "Boost",
-}
 
 
 class FenixModeSensor(SensorEntity):
     """Mode sensor entity for a Fenix V24 heating zone.
 
     This sensor displays the current operating mode for a specific heating zone.
-    Modes include: Off, Auto, Manual, Eco, Antifreeze, Boost.
+    Modes include: Off, Auto, Manual, Eco, Antifreeze.
 
     Attributes:
         _api: FenixV24API client for API communication
@@ -97,13 +87,7 @@ class FenixModeSensor(SensorEntity):
 
         Note:
             The Fenix V24 API returns mode as 'nv_mode' (new value mode).
-            Mode values:
-            - 0: Off
-            - 2/8: Eco
-            - 11: Auto (schedule)
-            - 13: Antifreeze
-            - 15: Manual
-            - 16: Boost
+            Mode values: 0=Manual, 1=Off, 2=Antifreeze, 8=Auto.
 
             This is a synchronous function that runs in Home Assistant's
             executor thread pool to avoid blocking the event loop.

@@ -23,3 +23,15 @@ API_LANGUAGE = "en_GB"
 # Temperature conversion
 # The Fenix V24 API returns temperature in tenths of degrees Fahrenheit
 TEMP_DIVISOR = 10.0
+
+# Operating mode mappings (confirmed by testing against live API)
+# API value -> human-readable name
+MODE_MAPPINGS = {
+    "0": "Manual",
+    "1": "Off",
+    "2": "Antifreeze",
+    "8": "Auto",
+}
+
+# Reverse mapping for setting modes: human-readable name -> API value
+MODE_NAME_TO_VALUE = {name: value for value, name in MODE_MAPPINGS.items()}

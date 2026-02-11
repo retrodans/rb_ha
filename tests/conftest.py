@@ -49,6 +49,9 @@ def mock_auth_response():
 def mock_zones_response():
     """Mock successful zones response from Fenix V24 API.
 
+    The API can return zones as either a list or dict depending on version.
+    This uses the list format as that's what the current API returns.
+
     Returns:
         dict: Mock zones data with sample zones
     """
@@ -56,7 +59,7 @@ def mock_zones_response():
         "data": {
             "zones": [
                 {
-                    "zone_id": "zone_1",
+                    "num_zone": "1",
                     "zone_label": "Living Room",
                     "devices": [
                         {
@@ -66,7 +69,7 @@ def mock_zones_response():
                     ],
                 },
                 {
-                    "zone_id": "zone_2",
+                    "num_zone": "2",
                     "zone_label": "Bedroom",
                     "devices": [
                         {

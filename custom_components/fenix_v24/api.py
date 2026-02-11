@@ -150,8 +150,6 @@ class FenixV24API:
             # Zones can be returned as either a list or dict depending on API version
             zones_raw = json_response.get("data", {}).get("zones", [])
 
-            _LOGGER.info(f"API returned {len(zones_raw) if isinstance(zones_raw, (list, dict)) else 0} zones from smarthome {self._smarthome_id}")
-
             # Convert to list of tuples (zone_id, zone_data)
             zones_list = []
 
@@ -160,38 +158,34 @@ class FenixV24API:
                 for zone_data in zones_raw:
                     zone_id = str(zone_data.get("num_zone", "unknown"))
                     zone_label = zone_data.get("zone_label", "Unknown")
-                    _LOGGER.info(f"Zone: {zone_label} (ID: {zone_id})")
+                    _LOGGER.debug(f"Zone: {zone_label} (ID: {zone_id})")
                     zones_list.append((zone_id, zone_data))
 
             elif isinstance(zones_raw, dict):
                 # API returns zones as dict where keys are zone IDs
                 for zone_id, zone_data in zones_raw.items():
                     zone_label = zone_data.get("zone_label", "Unknown")
-                    _LOGGER.info(f"Zone: {zone_label} (ID: {zone_id})")
+                    _LOGGER.debug(f"Zone: {zone_label} (ID: {zone_id})")
                     zones_list.append((zone_id, zone_data))
 
             else:
                 _LOGGER.warning(f"API returned zones as unexpected type: {type(zones_raw).__name__}")
 
+            _LOGGER.debug(f"Retrieved {len(zones_list)} zones from API")
             return zones_list
         else:
             _LOGGER.error(f"Failed to get zone data: {response.status_code}")
             return []
 
-    def set_boost(self, device_id: str, duration_minutes: int = 30) -> bool:
-        """Enable boost mode for a device.
+    def set_mode(self, device_id: str, mode_value: str) -> bool:
+        """Set the operating mode for a device.
 
         Args:
             device_id: Device ID (e.g., "C001-000")
-            duration_minutes: Duration in minutes (default 30)
+            mode_value: Mode value as string ("0"=Manual, "1"=Off, "2"=Antifreeze, "8"=Auto)
 
         Returns:
             bool: True if successful, False otherwise
-
-        Note:
-            This sets the device to manual mode with the boost temperature
-            setpoint for the specified duration. The actual boost implementation
-            may vary - test carefully!
         """
         if not self._access_token:
             raise Exception("Not authenticated")
@@ -203,35 +197,28 @@ class FenixV24API:
             "Content-Type": "application/x-www-form-urlencoded",
         }
 
-        # Convert minutes to seconds
-        duration_seconds = duration_minutes * 60
-
-        # Build the query to enable boost mode
-        # Mode 16 appears to be boost mode based on zone data (nv_mode: '16')
-        # We'll try setting time_boost and using the consigne_boost setpoint
         data = {
             "token": self._access_token,
             "smarthome_id": self._smarthome_id,
             "context": "1",
             "query[id_device]": device_id,
-            "query[time_boost]": str(duration_seconds),
-            "query[gv_mode]": "16",  # Boost mode
-            "query[nv_mode]": "16",
+            "query[gv_mode]": mode_value,
+            "query[nv_mode]": mode_value,
         }
 
-        _LOGGER.info(f"Setting boost mode for device {device_id} for {duration_minutes} minutes")
+        _LOGGER.info(f"Setting mode {mode_value} for device {device_id}")
 
         try:
             response = requests.post(url, data=data, headers=headers, timeout=API_TIMEOUT)
 
             if response.status_code == 200:
-                _LOGGER.info(f"Successfully enabled boost for device {device_id}")
+                _LOGGER.info(f"Successfully set mode {mode_value} for device {device_id}")
                 return True
             else:
-                _LOGGER.error(f"Failed to set boost: {response.status_code} - {response.text}")
+                _LOGGER.error(f"Failed to set mode: {response.status_code} - {response.text}")
                 return False
         except Exception as e:
-            _LOGGER.error(f"Exception setting boost: {e}")
+            _LOGGER.error(f"Exception setting mode: {e}")
             return False
 
     @property

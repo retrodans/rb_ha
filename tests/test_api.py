@@ -138,15 +138,15 @@ class TestFenixV24APIUnit:
         mock_response.json.return_value = mock_zones_response
         mock_requests_session.return_value = mock_response
 
-        # Get zones
+        # Get zones (returns list of tuples: [(zone_id, zone_data), ...])
         zones = api.get_zones()
 
-        # Verify zones were returned
+        # Verify zones were returned as tuples
         assert len(zones) == 2
-        assert zones[0]["zone_id"] == "zone_1"
-        assert zones[0]["zone_label"] == "Living Room"
-        assert zones[1]["zone_id"] == "zone_2"
-        assert zones[1]["zone_label"] == "Bedroom"
+        assert zones[0][0] == "1"  # zone_id (from num_zone field)
+        assert zones[0][1]["zone_label"] == "Living Room"  # zone_data
+        assert zones[1][0] == "2"
+        assert zones[1][1]["zone_label"] == "Bedroom"
 
         # Verify API was called correctly
         call_args = mock_requests_session.call_args
@@ -213,10 +213,11 @@ class TestFenixV24APIUnit:
     @pytest.mark.unit
     def test_temperature_data_extraction(self, test_credentials, mock_zones_response):
         """Test that temperature data can be extracted from zones."""
-        zones = mock_zones_response["data"]["zones"]
+        zones_list = mock_zones_response["data"]["zones"]
 
         # Living Room: 720 tenths of °F = 72.0°F = 22.2°C
-        living_room_device = zones[0]["devices"][0]
+        living_room = zones_list[0]
+        living_room_device = living_room["devices"][0]
         temp_raw = living_room_device["temperature_air"]
         temp_f = float(temp_raw) / 10.0
         temp_c = (temp_f - 32) * 5 / 9
@@ -225,7 +226,8 @@ class TestFenixV24APIUnit:
         assert round(temp_c, 1) == 22.2
 
         # Bedroom: 680 tenths of °F = 68.0°F = 20.0°C
-        bedroom_device = zones[1]["devices"][0]
+        bedroom = zones_list[1]
+        bedroom_device = bedroom["devices"][0]
         temp_raw = bedroom_device["temperature_air"]
         temp_f = float(temp_raw) / 10.0
         temp_c = (temp_f - 32) * 5 / 9
@@ -277,28 +279,30 @@ class TestFenixV24APIIntegration:
             test_credentials["smarthome_id"],
         )
 
-        # Authenticate and get zones
+        # Authenticate and get zones (returns list of tuples)
         api.authenticate()
         zones = api.get_zones()
 
         # Should have at least one zone
         assert len(zones) > 0
 
-        # Each zone should have required fields
-        for zone in zones:
-            assert "zone_id" in zone
-            assert "zone_label" in zone
-            assert "devices" in zone
+        # Each zone should be a tuple (zone_id, zone_data)
+        for zone_id, zone_data in zones:
+            assert zone_id is not None
+            assert "zone_label" in zone_data
+            assert "devices" in zone_data
 
             # Print zone info for debugging
-            print(f"\nZone: {zone['zone_label']} (ID: {zone['zone_id']})")
-            if zone["devices"]:
-                for device in zone["devices"]:
+            zone_label = zone_data["zone_label"]
+            print(f"\nZone: {zone_label} (ID: {zone_id})")
+            devices = zone_data.get("devices", {})
+            if devices:
+                for device_key, device in devices.items():
                     if "temperature_air" in device:
                         temp_raw = device["temperature_air"]
                         temp_f = float(temp_raw) / 10.0
                         temp_c = (temp_f - 32) * 5 / 9
-                        print(f"  Temperature: {temp_c:.1f}°C ({temp_f:.1f}°F)")
+                        print(f"  Device {device_key} Temperature: {temp_c:.1f}°C ({temp_f:.1f}°F)")
 
     @pytest.mark.integration
     def test_real_temperature_data(self, test_credentials, real_api_available):
@@ -312,16 +316,17 @@ class TestFenixV24APIIntegration:
             test_credentials["smarthome_id"],
         )
 
-        # Authenticate and get zones
+        # Authenticate and get zones (returns list of tuples)
         api.authenticate()
         zones = api.get_zones()
 
         # Find a zone with temperature data
         found_temperature = False
-        for zone in zones:
-            devices = zone.get("devices", [])
-            if devices and len(devices) > 0:
-                primary_device = devices[0]
+        for zone_id, zone_data in zones:
+            devices = zone_data.get("devices", {})
+            if devices:
+                # Get primary device (device '0')
+                primary_device = devices.get("0", {})
                 temp_raw = primary_device.get("temperature_air")
 
                 if temp_raw:
@@ -334,7 +339,8 @@ class TestFenixV24APIIntegration:
                     assert -50 < temp_c_rounded < 50, f"Temperature {temp_c_rounded}°C seems unreasonable"
 
                     found_temperature = True
-                    print(f"\n{zone['zone_label']}: {temp_c_rounded}°C")
+                    zone_label = zone_data.get("zone_label", "Unknown")
+                    print(f"\n{zone_label}: {temp_c_rounded}°C")
 
         # Should have found at least one temperature reading
         assert found_temperature, "No temperature data found in any zone"
